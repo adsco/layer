@@ -21,7 +21,9 @@ window.onload = function() {
 
 		animation = new AnimatedAnimation(frames, 5);
 
-		animation.start();
+		animation.start(function() {
+			console.log('end');
+		});
 
 		render = function() {
 			context.clearRect(0, 0, 252, 288);

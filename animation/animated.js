@@ -16,6 +16,7 @@ export default class Animated {
 
 	render(time, context, x = 0, y = 0) {
 		var index = this._lastFrameIndex;
+		var rewinded = false;
 
 		// -1 means animation start has been invoked, hence 1-st render must render first frame
 		if (this._lastUpdateTime === -1) {
@@ -30,6 +31,7 @@ export default class Animated {
 		// when last frame has been rendered and animation is looped, we must reset index to 1-st frame
 		if (index >= this._frames.length && this._repeat) {
 			index = 0;
+			rewinded = true;
 		}
 
 		this._frames[index].render(context, x, y);
@@ -37,7 +39,7 @@ export default class Animated {
 		this._lastFrameIndex = index;
 		this._lastUpdateTime = time - this._lastUpdateTime > this._updateInterval ? time : this._lastUpdateTime;
 
-		if (index >= this._frames.length && this._callback) {
+		if (rewinded && this._callback) {
 			this._callback();
 		}
 	}

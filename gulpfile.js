@@ -9,15 +9,29 @@ var browserify = require('browserify');
 var watch = require('gulp-watch');
 var replaceSrc = require('gulp-replace');
 
-gulp.task('default', gulpSync.sync(['babelify', 'transpile', 'minify', 'replace-src']));
+function swallowError(error) {
+	// If you want details of the error in the console
+	console.log('Error occured: ' + error.toString());
 
-gulp.task('transpile', function(done) {
+	this.emit('end');
+}
+
+gulp.task('default', function() {
+	//watch('./lib/*', function() {
+		gulp.start('mainSequence').on('error', swallowError);
+	//});
+});
+
+gulp.task('mainSequence', ['babelify', 'transpile', 'minify', 'replace-src']);
+
+// Transpile
+gulp.task('transpile', ['babelify'], function(done) {
 	return gulp.src('./layer/*.js')
 		.pipe(babel())
 		.pipe(gulp.dest('./lib/'));
 });
 
-gulp.task('minify', function() {
+gulp.task('minify', ['transpile'], function() {
 	return gulp.src('./dist/app.js')
 		.pipe(minify({
 			ext: {
@@ -28,14 +42,15 @@ gulp.task('minify', function() {
 		.pipe(gulp.dest('./dist/'));
 });
 
+// Convert imports into require
 gulp.task('babelify', function() {
 	return browserify('./index.js')
-		.transform(babelify)
+		.transform("babelify", {sourceMaps: true})
 		.bundle()
 		.pipe(fs.createWriteStream('./dist/app.js'));
 });
 
-gulp.task('replace-src', function() {
+gulp.task('replace-src', ['minify'], function() {
 	del(['./dist/index.html']);
 
 	return gulp.src(['./index.html'])

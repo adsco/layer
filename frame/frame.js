@@ -21,6 +21,14 @@ export default class Frame {
 		this._offsetY = offsetY === null ? 0 : offsetY;
 	}
 
+	get width() {
+		return this._width;
+	}
+
+	get height() {
+		return this._height;
+	}
+
 	/**
 	 * Frame render function
 	 *

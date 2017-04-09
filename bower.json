@@ -1,0 +1,21 @@
+{
+  "name": "layer",
+  "description": "Layer - animation component",
+  "main": "dist/app.js",
+  "authors": [
+    "eternitywisher@gmail.com"
+  ],
+  "license": "ISC",
+  "keywords": [
+    "LAYER",
+    "ANIMATION"
+  ],
+  "homepage": "https://github.com/adsco/layer",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

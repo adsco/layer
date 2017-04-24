@@ -1,46 +1,64 @@
 export default class Animated {
 	constructor(frames = [], fps = 60, repeat = true) {
 		this._frames = frames;
+        this._maxIndex = frames.length - 1;
 		this._fps = fps;
 		this._repeat = !!repeat;
 		this._updateInterval = 1000 / fps;
 		this._lastFrameIndex = 0;
-		this._lastUpdateTime = 0;
+		this._lastUpdateTime = null;
+        this._accumulatedFrameTime = 0;
+        this._paused = false;
 	}
+    
+    get paused() {
+        return this._paused;
+    }
 
-	start(callback = null) {
-		this._lastUpdateTime = -1;
+    reset() {
+        this._lastUpdateTime = null;
 		this._lastFrameIndex = 0;
-		this._callback = callback;
-	}
+    }
+    
+    pause() {
+        this._paused = true;
+    }
+    
+    play() {
+        this._paused = false;
+    }
 
 	render(time, context, x = 0, y = 0) {
 		var index = this._lastFrameIndex;
-		var rewinded = false;
+        var animationEnd = false;
 
-		// -1 means animation start has been invoked, hence 1-st render must render first frame
-		if (this._lastUpdateTime === -1) {
-			this._lastUpdateTime = 0;
-		}
+        if (this._lastUpdateTime === null) {
+            this._lastUpdateTime = time;
+        }
+        
+        if (!this._paused) {
+            this._accumulatedFrameTime += time - this._lastUpdateTime;
+        }
 
 		// time passed is more than update interval, hence next frame must be rendered
-		if (time - this._lastUpdateTime > this._updateInterval) {
-			index++;
+		if (this._accumulatedFrameTime >= this._updateInterval) {
+            if (index < this._maxIndex) {
+                index++;
+            } else if (this._repeat) {
+                index = 0;
+                animationEnd = true;
+            } else {
+                animationEnd = true;
+            }
+            
+            this._accumulatedFrameTime -= this._updateInterval;
 		}
-
-		// when last frame has been rendered and animation is looped, we must reset index to 1-st frame
-		if (index >= this._frames.length && this._repeat) {
-			index = 0;
-			rewinded = true;
-		}
-
-		this._frames[index].render(context, x, y);
-
-		this._lastFrameIndex = index;
-		this._lastUpdateTime = time - this._lastUpdateTime > this._updateInterval ? time : this._lastUpdateTime;
-
-		if (rewinded && this._callback) {
-			this._callback();
-		}
+        
+        this._frames[index].render(context, x, y);
+        
+        this._lastFrameIndex = index;
+        this._lastUpdateTime = time;
+        
+        return animationEnd;
 	}
 }

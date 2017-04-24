@@ -28,7 +28,7 @@ export default class Animated {
         this._paused = false;
     }
 
-	render(time, context, x = 0, y = 0) {
+	render(context, time, x = 0, y = 0) {
 		var index = this._lastFrameIndex;
         var animationEnd = false;
 
